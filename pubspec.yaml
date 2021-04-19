@@ -24,7 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   easy_udp: ^1.2.0
-  sensors: ^2.0.0
+  flutter_sensors: ^0.1.6
   wifi: ^0.1.5
   async: ^2.5.0
 

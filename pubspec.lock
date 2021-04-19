@@ -69,6 +69,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_sensors:
+    dependency: "direct main"
+    description:
+      name: flutter_sensors
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.6"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -95,13 +102,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.0"
-  sensors:
-    dependency: "direct main"
-    description:
-      name: sensors
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.0"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -171,5 +171,5 @@ packages:
     source: hosted
     version: "0.1.5"
 sdks:
-  dart: ">=2.12.0-259.9.beta <3.0.0"
-  flutter: ">=1.12.13+hotfix.5"
+  dart: ">=2.12.0-0.0 <3.0.0"
+  flutter: ">=0.1.4"

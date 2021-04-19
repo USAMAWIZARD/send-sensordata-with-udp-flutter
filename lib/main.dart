@@ -2,12 +2,16 @@ import 'dart:convert';
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:sensors/sensors.dart';
+import 'package:flutter_sensors/flutter_sensors.dart';
 import 'package:easy_udp/easy_udp.dart';
 import 'package:wifi/wifi.dart';
 
+TextEditingController ipaddress = new TextEditingController();
+TextEditingController portno = new TextEditingController();
 void main() {
   runApp(MaterialApp(home: Home()));
+  ipaddress.text = "192.168.0.105";
+  portno.text = "4000";
 }
 
 class Home extends StatefulWidget {
@@ -16,27 +20,36 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  TextEditingController ipaddress = new TextEditingController();
-  TextEditingController portno = new TextEditingController();
   String srcip;
   int desport;
   String desip;
   var socket;
   int i = 0;
-
+  var stream;
   void initializer() async {
     print("values initialized");
     desip = ipaddress.text;
     srcip = await Wifi.ip;
     desport = int.parse(portno.text);
     socket = await EasyUDPSocket.bind(srcip, 8000);
+
+    stream = await SensorManager().sensorUpdates(
+      sensorId: Sensors.ACCELEROMETER,
+      interval: Sensors.SENSOR_DELAY_FASTEST,
+    );
   }
 
   void init() async {
     await initializer();
-    accelerometerEvents.listen((AccelerometerEvent event) async {
+    stream.listen((sensorEvent) async {
       await socket.send(
-          ascii.encode(event.toString() + i.toString()), desip, desport);
+          ascii.encode(sensorEvent.data[0].toString() +
+              ',' +
+              sensorEvent.data[1].toString() +
+              ',' +
+              sensorEvent.data[2].toString()),
+          desip,
+          desport);
       // await socket.send(ascii.encode(i.toString()), desip, desport);
 
       print(i);
