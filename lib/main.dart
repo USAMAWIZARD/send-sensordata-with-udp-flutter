@@ -27,54 +27,50 @@ class _HomeState extends State<Home> {
   int i = 0;
   var accdatastreem;
   var magnetodatastreem;
+  var sensorname = [Sensors.MAGNETIC_FIELD, Sensors.ACCELEROMETER];
+  var sensors = {};
+
   void initializer() async {
     print("values initialized");
     desip = ipaddress.text;
     srcip = await Wifi.ip;
     desport = int.parse(portno.text);
     socket = await EasyUDPSocket.bind(srcip, 8000);
-
-    accdatastreem = await SensorManager().sensorUpdates(
-      sensorId: Sensors.ACCELEROMETER,
-      interval: Sensors.SENSOR_DELAY_FASTEST,
-    );
-    if (await SensorManager().isSensorAvailable(Sensors.MAGNETIC_FIELD)) {
-      magnetodatastreem = await SensorManager().sensorUpdates(
-        sensorId: Sensors.MAGNETIC_FIELD,
-        interval: Sensors.SENSOR_DELAY_FASTEST,
-      );
+    for (var i = 0; i < sensorname.length; i++) {
+      if (await SensorManager().isSensorAvailable(sensorname[i])) {
+        sensors[sensorname[i]] = await SensorManager().sensorUpdates(
+          sensorId: sensorname[i],
+          interval: Sensors.SENSOR_DELAY_FASTEST,
+        );
+      }
     }
   }
 
   void init() async {
     await initializer();
-    accdatastreem.listen((sensorEvent) async {
-      await socket.send(
-          ascii.encode("a," +
-              sensorEvent.data[0].toString() +
-              ',' +
-              sensorEvent.data[1].toString() +
-              ',' +
-              sensorEvent.data[2].toString()),
-          desip,
-          desport);
-
-      print(i);
-      i += 1;
-    });
-    if (await SensorManager().isSensorAvailable(Sensors.MAGNETIC_FIELD)) {
-      magnetodatastreem.listen((sensorEvent) async {
-        await socket.send(
-            ascii.encode("m," +
-                sensorEvent.data[0].toString() +
-                ',' +
-                sensorEvent.data[1].toString() +
-                ',' +
-                sensorEvent.data[2].toString()),
-            desip,
-            desport);
-      });
+    for (var i = 0; i < sensorname.length; i++) {
+      if (await SensorManager().isSensorAvailable(sensorname[i])) {
+        sensors[sensorname[i]].listen((sensorEvent) async {
+          await socket.send(
+              ascii.encode("m," +
+                  sensorEvent.data[0].toString() +
+                  ',' +
+                  sensorEvent.data[1].toString() +
+                  ',' +
+                  sensorEvent.data[2].toString()),
+              desip,
+              desport);
+          print(sensorEvent.data);
+        });
+      }
     }
+    print(sensors);
+  }
+
+  void stopSending() async {
+    sensorname.forEach((name) {
+      sensors[name] = null;
+    });
   }
 
   @override
@@ -110,6 +106,11 @@ class _HomeState extends State<Home> {
               child: Text("start sending"),
               onPressed: () async => {
                     init(),
+                  }),
+          TextButton(
+              child: Text("stop sending"),
+              onPressed: () async => {
+                    stopSending(),
                   })
         ],
       ),
